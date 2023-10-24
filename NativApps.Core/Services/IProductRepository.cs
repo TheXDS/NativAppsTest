@@ -6,7 +6,7 @@ namespace NativApps.Core.Services;
 /// Defines a set of members to be implemented by a type that exposes methods
 /// to read and write products in a data repository.
 /// </summary>
-public interface IProductRepository
+public interface IProductRepository : IDisposable
 {
     /// <summary>
     /// Adds the product into the repository data store.

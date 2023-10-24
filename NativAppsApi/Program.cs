@@ -31,6 +31,34 @@ public class Program
         app.UseRouting();
         app.UseAuthorization();
         app.MapControllers();
+
+        PopulateTestDb(app.Services, 20);
+
         await app.RunAsync();
+    }
+
+    private static void PopulateTestDb(IServiceProvider serviceCollection, int qty)
+    {
+        using var svc = serviceCollection.GetRequiredService<IProductRepository>();
+
+        foreach (var product in Enumerable.Range(1, qty).Select(GetFullProduct))
+        {
+            svc.Create(product);
+        }
+    }
+
+    private static readonly Random _rnd = new();
+
+    private static Product GetFullProduct(int id)
+    {
+        return new Product()
+        {
+            ProductId = id,
+            Category = $"CategoryValue {id % 4}",
+            Description = $"DescriptionValue {id} DescriptionValue {id}. Lorem ipsum dolot sit amet consectur viamos laude.",
+            InitialQuantity = _rnd.Next(25, 100),
+            Name = $"NameValue {id}",
+            Price = _rnd.Next(2, 20) * 50,
+        };
     }
 }
