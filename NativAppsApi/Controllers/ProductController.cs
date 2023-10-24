@@ -1,14 +1,20 @@
-using Microsoft.AspNetCore.Authorization;
+
 using Microsoft.AspNetCore.Mvc;
 using NativApps.Core.Models;
 using NativApps.Core.Services;
 using ProductDto = NativApps.Core.Models.Dto.ProductDto;
 
+#if IncludeAuthorization
+using Microsoft.AspNetCore.Authorization;
+#endif
+
 namespace NativAppsApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+#if IncludeAuthorization
 [Authorize]
+#endif
 public class ProductsController : ControllerBase
 {
     private readonly IProductService service;

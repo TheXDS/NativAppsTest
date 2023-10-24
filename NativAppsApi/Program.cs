@@ -18,7 +18,9 @@ public class Program
         builder.Services.AddTransient<IProductService, ProductService>();
         builder.Services.AddControllers();
         builder.Services.AddEndpointsApiExplorer();
+#if IncludeAuthorization
         builder.Services.AddAuthentication("Bearer").AddJwtBearer().AddJwtBearer("LocalAuthIssuer");
+#endif
         builder.Services.AddSwaggerGen();
         var app = builder.Build();
         if (app.Environment.IsDevelopment())
@@ -32,15 +34,17 @@ public class Program
         app.UseAuthorization();
         app.MapControllers();
 
-        PopulateTestDb(app.Services, 20);
+        PopulateTestDb(20);
 
         await app.RunAsync();
     }
 
-    private static void PopulateTestDb(IServiceProvider serviceCollection, int qty)
+    private static void PopulateTestDb(int qty)
     {
-        using var svc = serviceCollection.GetRequiredService<IProductRepository>();
-
+        var options = new DbContextOptionsBuilder();
+        options.UseInMemoryDatabase(nameof(NativAppsApiContext));
+        var context = new NativAppsApiContext(options.Options);
+        using var svc = new ProductRepository(context);
         foreach (var product in Enumerable.Range(1, qty).Select(GetFullProduct))
         {
             svc.Create(product);
@@ -54,7 +58,7 @@ public class Program
         return new Product()
         {
             ProductId = id,
-            Category = $"CategoryValue {id % 4}",
+            Category = $"CategoryValue {((id - 1) % 4) + 1}",
             Description = $"DescriptionValue {id} DescriptionValue {id}. Lorem ipsum dolot sit amet consectur viamos laude.",
             InitialQuantity = _rnd.Next(25, 100),
             Name = $"NameValue {id}",
